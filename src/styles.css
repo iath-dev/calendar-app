@@ -1,0 +1,14 @@
+html, body {
+    width: 100vw;
+    height: 100vh;
+}
+
+.calendar-screen {
+    display: flex;
+    flex-flow: column;
+    height: calc(100vh - 56px);
+}
+
+.rbc-calendar {
+    height: 100%;
+}
