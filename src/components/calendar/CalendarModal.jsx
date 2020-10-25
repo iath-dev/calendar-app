@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Modal from 'react-modal';
 import DateTimePicker from 'react-datetime-picker';
 import moment from 'moment'
+import Swal from 'sweetalert2'
 
 import './modal.css'
+import { useSelector, useDispatch } from 'react-redux';
+import { uiModalClose } from '../../actions/uiActions';
+import { calendarAddEvent, calendarEditEvent } from '../../actions/calendarActions';
  
 const customStyles = {
     content : {
@@ -16,13 +20,96 @@ const customStyles = {
     }
 };
 
+const now = moment().add(1, 'h')
+
 Modal.setAppElement('#root')
 
+const initEvent = {
+    start: now.toDate(),
+    end: now.clone().add(2, 'h').toDate(),
+    title: 'titulo',
+    notes: ''
+}
+
 const CalendarModal = () => {
+    
+    const { ui: { modal }, calendar: { active } } = useSelector(state => state)
+    const dispatch = useDispatch()
+
+    const [values, setValues] = useState({
+        ...initEvent
+    })
+
+    const {
+        start,
+        end,
+        title,
+        notes
+    } = values
+
+    const handleCloseModal = () => {
+        setValues(initEvent)
+        dispatch(uiModalClose())
+    }
+
+    const handleChangeDate = (date, value) => {
+        setValues(vals => ({ ...vals, [date]: value }))
+    }
+
+    const handleInputChange = ({ target: { name, value } }) => setValues(vals => ({ ...vals, [name]: value }))
+
+    const handleSubmit = e => {
+        e.preventDefault()
+
+        const momentStart = moment(start)
+        const momentEnd = moment(end)
+
+        if (momentStart.isSameOrAfter(momentEnd)) {
+            return Swal.fire({
+                title: 'Error...',
+                text: 'Las dos fechas no pueden ser iguales',
+                icon: 'error'
+            })
+        }
+
+        if (title.trim().length < 2) {
+            return Swal.fire({
+                title: 'Error',
+                text: 'El titulo debe tener mínimo 2 caracteres',
+                icon: 'error'
+            })
+        }
+
+        if (active) {
+            dispatch(calendarEditEvent(values))
+        } else {
+            dispatch(calendarAddEvent(
+                {
+                    ...values,
+                    id: new Date().getTime(),
+                    user: {
+                        _id: '123',
+                        name: 'Fernando'
+                    }
+                }
+            ))
+        }
+        handleCloseModal()
+    }
+
+    useEffect(() => {
+        if (active) {
+            setValues(active)
+        } else {
+            setValues(initEvent)
+        }
+        
+    }, [active])
+
     return (
         <Modal
-            isOpen={true}
-            onRequestClose={console.log}
+            isOpen={modal}
+            onRequestClose={handleCloseModal}
             style={customStyles}
             closeTimeoutMS={200}
             contentLabel="Example Modal"
@@ -31,17 +118,30 @@ const CalendarModal = () => {
         >
             <h1> Nuevo evento </h1>
             <hr />
-            <form className="container">
+            <form className="container" onSubmit={handleSubmit}>
 
                 <div className="form-group">
                     <label>Fecha y hora inicio</label>
-                    <DateTimePicker onChange={console.log} required name="startDate" value={moment().toDate()} className="form-control" />
+                    <DateTimePicker
+                        onChange={d => handleChangeDate('start', d)}
+                        required
+                        name="start"
+                        value={start}
+                        className="form-control"
+                    />
                     {/* <input className="form-control" placeholder="Fecha inicio" /> */}
                 </div>
 
                 <div className="form-group">
                     <label>Fecha y hora fin</label>
-                    <DateTimePicker onChange={console.log} required name="endDate" value={moment().add(1, 'hours').toDate()} className="form-control" />
+                    <DateTimePicker
+                        onChange={d => handleChangeDate('end', d)}
+                        required
+                        name="end"
+                        minDate={start}
+                        value={end}
+                        className="form-control"
+                    />
                     {/* <input className="form-control" placeholder="Fecha inicio" /> */}
                 </div>
 
@@ -53,7 +153,9 @@ const CalendarModal = () => {
                         className="form-control"
                         placeholder="Título del evento"
                         name="title"
+                        value={title}
                         autoComplete="off"
+                        onChange={handleInputChange}
                     />
                     <small id="emailHelp" className="form-text text-muted">Una descripción corta</small>
                 </div>
@@ -64,7 +166,9 @@ const CalendarModal = () => {
                         className="form-control"
                         placeholder="Notas"
                         rows="5"
+                        value={notes}
                         name="notes"
+                        onChange={handleInputChange}
                     ></textarea>
                     <small id="emailHelp" className="form-text text-muted">Información adicional</small>
                 </div>

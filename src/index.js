@@ -1,11 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux'
+
 import CalendarApp from './CalendarApp';
 
 import './styles.css'
+import { store } from './store/store';
 
 ReactDOM.render(
-  <CalendarApp />,
+  <Provider store={store}>
+    <CalendarApp />
+  </Provider>,
   document.getElementById('root')
 );
 

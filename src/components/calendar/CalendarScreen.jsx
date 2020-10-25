@@ -10,33 +10,33 @@ import { messages } from '../../helpers/calendar';
 import Navbar from '../ui/Navbar'
 import CalendarEvent from './CalendarEvent';
 import CalendarModal from './CalendarModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { uiModelOpen } from '../../actions/uiActions';
+import { calendarSetEvent, calendarClearEvent } from '../../actions/calendarActions';
 
 const localizar = momentLocalizer(moment)
 
-const events = [{
-    title: 'Cumpleaños del jefe',
-    start: moment().toDate(),
-    end: moment().add(2, "hours").toDate(),
-    bgColor: '#fafafa',
-    notes: 'Comprar regalo',
-    user: {
-        _id: 123456,
-        name: 'Jesus Neira'
-    }
-}]
+// const events = []
 
 const CalendarScreen = () => {
+
+    const { events } = useSelector(({ calendar }) => calendar)
+    const dispatch = useDispatch()
 
     const handleViewChange = range => {
         localStorage.setItem('calendar-range', range)
     }
 
     const handleSelectEvent = event => {
-        console.log(event)
+        dispatch(calendarSetEvent(event))
     }
 
-    const handleDoubleClickEvent = (event) => {
-        console.log({ event })
+    const handleDoubleClickEvent = () => {
+        dispatch(uiModelOpen())
+    }
+
+    const handleClickSlot = () => {
+        dispatch(calendarClearEvent())
     }
 
     const eventStyleGetter = (event, start, end, isSelected) => {
@@ -69,6 +69,8 @@ const CalendarScreen = () => {
                     event: CalendarEvent
                 }}
                 onView={handleViewChange}
+                onSelectSlot={handleClickSlot}
+                selectable
                 onSelectEvent={handleSelectEvent}
                 onDoubleClickEvent={handleDoubleClickEvent}
             />
