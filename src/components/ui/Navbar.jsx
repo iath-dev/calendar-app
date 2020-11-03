@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { uiModelOpen } from '../../actions/uiActions'
-import { calendarSetEvent, calendarClearEvent, calendarDeleteEvent } from '../../actions/calendarActions'
+import { calendarClearEvent, calendarDeleteEvent } from '../../actions/calendarActions'
 
 const Navbar = () => {
 
