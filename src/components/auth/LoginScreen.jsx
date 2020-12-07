@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDispatch } from 'react-redux';
-import { startLogin } from '../../actions/authActions';
+import { startLogin, startRegister } from '../../actions/authActions';
 import { useForm } from '../../hooks/useForm/useForm';
 import './LoginScreen.css'
 
@@ -15,9 +15,28 @@ const LoginScreen = () => {
         }
     })
 
+    const [registerValues, handleRegisterChanges, , handleRegisterSubmit, registerError] = useForm({
+        defaultValues: {
+            name: '',
+            email: '',
+            password: '',
+            confirm: ''
+        },
+        validateField: {
+            password: ({ password }) => password.trim().length < 5,
+            confirm: ({ confirm, password }) => confirm .trim() !== password.trim()
+        }
+    })
+
     const handleLogin = ({ email, password }) => dispatch(startLogin(email, password))
 
+    const handleRegister = ({ email, password, name }) => {
+        dispatch(startRegister(name, email, password))
+    }
+
     const { email: lEmail, password: lPassword } = loginValues
+
+    const { name: rName, email: rEmail, password: rPassword, confirm: rConfirm } = registerValues
 
     return (
         <div className="container login-container">
@@ -59,26 +78,38 @@ const LoginScreen = () => {
 
                 <div className="col-md-6 login-form-2">
                     <h3>Registro</h3>
-                    <form>
+                    <form onSubmit={e => handleRegisterSubmit(e, handleRegister)}>
                         <div className="form-group">
                             <input
                                 type="text"
                                 className="form-control"
+                                autoComplete="off"
                                 placeholder="Nombre"
+                                name="name"
+                                value={rName}
+                                onChange={handleRegisterChanges}
                             />
                         </div>
                         <div className="form-group">
                             <input
                                 type="email"
                                 className="form-control"
+                                autoComplete="off"
                                 placeholder="Correo"
+                                name="email"
+                                value={rEmail}
+                                onChange={handleRegisterChanges}
                             />
                         </div>
                         <div className="form-group">
                             <input
                                 type="password"
                                 className="form-control"
+                                autoComplete="off"
                                 placeholder="Contraseña" 
+                                name="password"
+                                value={rPassword}
+                                onChange={handleRegisterChanges}
                             />
                         </div>
 
@@ -86,9 +117,19 @@ const LoginScreen = () => {
                             <input
                                 type="password"
                                 className="form-control"
-                                placeholder="Repita la contraseña" 
+                                autoComplete="off"
+                                placeholder="Repita la contraseña"
+                                name="confirm"
+                                value={rConfirm}
+                                onChange={handleRegisterChanges}
                             />
                         </div>
+
+                        {registerError && (
+                            <div className="alert alert-danger">
+                                Error, información no valida
+                            </div>
+                        )}
 
                         <div className="form-group">
                             <input 

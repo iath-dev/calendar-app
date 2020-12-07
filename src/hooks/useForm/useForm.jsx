@@ -21,7 +21,6 @@ export const useForm = ({
             const [key, validate] = element
 
             const response = validate(values)
-
             
             if (response) {
                 $error = { ...$error, [key]: response }

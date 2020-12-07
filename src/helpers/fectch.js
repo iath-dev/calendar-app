@@ -16,3 +16,24 @@ export const noTokenFetch = (endpoint, data, method = "GET") => {
     }
 
 }
+
+export const TokenFetch = (endpoint, data, method = "GET") => {
+    const url = `${BASE_URL}${endpoint}`
+
+    if (method === "GET") {
+        return fetch(url, {
+            headers: {
+                'Authorization': localStorage.getItem('token-calendar')
+            }
+        })
+    } else {
+        return fetch(url, {
+            method,
+            headers: {
+                'Content-type': 'application/json',
+                'Authorization': localStorage.getItem('token-calendar')
+            },
+            body: JSON.stringify(data)
+        })
+    }
+}
